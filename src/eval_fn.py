@@ -2,10 +2,18 @@ import numpy as np
 import piece
 
 
-def evaluation_state(state, current_color):
-    return evaluate_color(state, piece.BLACK, current_color) + \
-        evaluate_color(state, piece.WHITE, current_color)
-
+def evaluation_state(state, current_color, difficulty="Medium"):
+    # For Easy difficulty, completely bypass evaluation
+    if difficulty == "Easy":
+        return 0  # Return a constant value to prevent any strategic thinking
+    
+    # For Medium and Hard difficulties, use the normal evaluation
+    if difficulty == "Medium":
+        return evaluate_color(state, piece.BLACK, current_color) + \
+               evaluate_color(state, piece.WHITE, current_color)
+    else:  # Hard
+        return (evaluate_color(state, piece.BLACK, current_color) + \
+                evaluate_color(state, piece.WHITE, current_color)) * 1.3
 
 def evaluate_color(state, color, current_color):
     values = state.values

@@ -22,7 +22,7 @@ class SetupWindow:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Gomoku Setup")
-        self.root.geometry("400x210")
+        self.root.geometry("400x300")  # Increased height for difficulty selection
         self.root.configure(bg=BACKGROUND_COLOR)
         self.root.eval('tk::PlaceWindow . center')
 
@@ -49,8 +49,22 @@ class SetupWindow:
                                  buttondownrelief=tk.FLAT)
         self.spinbox.pack(pady=10)
 
+        # Add difficulty selection
+        self.difficulty_label = tk.Label(self.root, text="Select Difficulty Level:", bg=BACKGROUND_COLOR, font=("Times New Roman", 15, "bold"), fg=FONTCOLOR)
+        self.difficulty_label.pack(pady=(20, 10))
+
+        self.difficulty_var = tk.StringVar(value="Medium")
+        difficulties = ["Easy", "Medium", "Hard"]
+        self.difficulty_menu = ttk.Combobox(self.root, 
+                                          textvariable=self.difficulty_var,
+                                          values=difficulties,
+                                          state="readonly",
+                                          font=FONT,
+                                          width=10)
+        self.difficulty_menu.pack(pady=10)
+
         self.start_button = tk.Button(self.root, text="Start Game", command=self.start_game,
-                                      bg=BUTTON_BG, activebackground=BUTTON_ACTIVE_BG, fg=FONTCOLOR,
+                                      bg=BUTTON_BG, activebackground=BUTTON_HOVER_BG, fg=FONTCOLOR,
                                       relief=tk.FLAT, font=FONT)
         self.start_button.pack(pady=10)
         
@@ -59,39 +73,41 @@ class SetupWindow:
         self.start_button.bind("<Leave>", lambda e: self.start_button.configure(bg=BUTTON_BG))
 
         self.selected_size = None
+        self.selected_difficulty = None
 
     def start_game(self):
         self.selected_size = self.size_var.get()
+        self.selected_difficulty = self.difficulty_var.get()
         self.root.destroy()
 
     def run(self):
         self.root.mainloop()
-        return self.selected_size
+        return self.selected_size, self.selected_difficulty
 
 class GomokuGUI:
-    def __init__(self, board_size):
+    def __init__(self, board_size, difficulty="Medium"):
         self.root = tk.Tk()
         self.root.title("Gomoku")
         
         self.root.configure(bg=BACKGROUND_COLOR)
         
         self.board_size = board_size
-        self.cell_size = 35  # Increased cell size for better visibility
-        self.margin = 40  # Increased margin for better spacing
+        self.difficulty = difficulty
+        self.cell_size = 35
+        self.margin = 40
 
         # Calculate window dimensions
         board_width = self.board_size  * self.cell_size
         board_height = self.board_size * self.cell_size 
         total_width = board_width + 6 * self.margin
-        total_height = board_height + 3 * self.margin + 60  # Added extra space for the button
+        total_height = board_height + 3 * self.margin + 60
         
         # Set window size and position it on the left side
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         
-        # Position window on the left side with some margin from the edge
-        x_position = 50  # 50 pixels from the left edge
-        y_position = (screen_height - total_height) // 2  # Center vertically
+        x_position = 50
+        y_position = (screen_height - total_height) // 2
         
         self.root.geometry(f"{total_width}x{total_height}+{x_position}+{y_position}")
 
@@ -105,7 +121,7 @@ class GomokuGUI:
 
         # Button under canvas
         self.restart_button = tk.Button(self.root, text="New Game", command=self.restart_game,
-                                        bg=BUTTON_BG, activebackground=BUTTON_ACTIVE_BG , fg=FONTCOLOR,
+                                        bg=BUTTON_BG, activebackground=BUTTON_HOVER_BG, fg=FONTCOLOR,
                                         relief=tk.FLAT, font=FONT)
         self.restart_button.pack(pady=(0, 10))
         
@@ -113,8 +129,8 @@ class GomokuGUI:
         self.restart_button.bind("<Enter>", lambda e: self.restart_button.configure(bg=BUTTON_HOVER_BG))
         self.restart_button.bind("<Leave>", lambda e: self.restart_button.configure(bg=BUTTON_BG))
 
-        # Initialize game
-        self.game = GameRunner(size=self.board_size)
+        # Initialize game with difficulty
+        self.game = GameRunner(size=self.board_size, difficulty=self.difficulty)
         self.game.restart(player_index=1)
         self.draw_board()
         self.canvas.bind('<Button-1>', self.handle_click)
@@ -122,9 +138,9 @@ class GomokuGUI:
     def restart_game(self):
         self.root.destroy()
         setup = SetupWindow()
-        board_size = setup.run()
+        board_size, difficulty = setup.run()
         if board_size:
-            gui = GomokuGUI(board_size)
+            gui = GomokuGUI(board_size, difficulty)
             gui.run()
 
     def draw_board(self):
@@ -183,8 +199,8 @@ class GomokuGUI:
 
 if __name__ == "__main__":
     setup = SetupWindow()
-    board_size = setup.run()
+    board_size, difficulty = setup.run()
 
     if board_size:
-        gui = GomokuGUI(board_size)
+        gui = GomokuGUI(board_size, difficulty)
         gui.run()

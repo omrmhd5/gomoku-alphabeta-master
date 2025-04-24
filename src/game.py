@@ -5,11 +5,21 @@ from ai import get_best_move
 
 
 class GameRunner:
-    def __init__(self, size=19, depth=2):
+    def __init__(self, size=19, difficulty="Medium"):
         self.size = size
-        self.depth = depth
+        self.difficulty = difficulty
         self.finished = False
+        
+        # Set search depth based on difficulty
+        if difficulty == "Easy":
+            self.depth = 1  # Lower depth for easier AI
+        elif difficulty == "Medium":
+            self.depth = 2
+        else:  # Hard
+            self.depth = 3
+            
         self.restart()
+
 
     def restart(self, player_index=-1):
         self.is_max_state = True if player_index == -1 else False
