@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from game import GameRunner
+import time
 
 class SetupWindow:
     def __init__(self):
@@ -116,6 +117,8 @@ class GomokuGUI:
         if 0 <= board_x < self.board_size and 0 <= board_y < self.board_size:
             if self.game.play(board_y, board_x):
                 self.draw_board()
+                self.root.update()  # Force update the display
+                time.sleep(0.5)  # 500ms delay after player's move is shown
                 self.game.aiplay()
                 self.draw_board()
                 
