@@ -11,7 +11,8 @@ BLACK_PIECE = "#333333"
 WHITE_PIECE = "#ffffff"
 BUTTON_BG = "#2E3D49"
 BUTTON_ACTIVE_BG = "#547792"
-SPINBOX_BG = "#2E3D49"
+BUTTON_HOVER_BG = "#3c4c60"  # New hover background for button
+SPINBOX_BG = "#405466"  # Lighter shade for spinbox background
 SPINBOX_FG = "white"
 SPINBOX_BORDER = "#a0a0a0"
 FONT = ("Times New Roman", 12)
@@ -52,6 +53,10 @@ class SetupWindow:
                                       bg=BUTTON_BG, activebackground=BUTTON_ACTIVE_BG, fg=FONTCOLOR,
                                       relief=tk.FLAT, font=FONT)
         self.start_button.pack(pady=10)
+        
+        # Add hover effects for Start Game button
+        self.start_button.bind("<Enter>", lambda e: self.start_button.configure(bg=BUTTON_HOVER_BG))
+        self.start_button.bind("<Leave>", lambda e: self.start_button.configure(bg=BUTTON_BG))
 
         self.selected_size = None
 
@@ -70,28 +75,43 @@ class GomokuGUI:
         
         self.root.configure(bg=BACKGROUND_COLOR)
         
-
         self.board_size = board_size
-        self.cell_size = 30
-        self.margin = 20
+        self.cell_size = 35  # Increased cell size for better visibility
+        self.margin = 40  # Increased margin for better spacing
 
-        total_width = self.board_size * self.cell_size + 2 * self.margin
-        total_height = self.board_size * self.cell_size + 2 * self.margin + 50
-        self.root.geometry(f"{total_width+20}x{total_height}")
+        # Calculate window dimensions
+        board_width = self.board_size  * self.cell_size
+        board_height = self.board_size * self.cell_size 
+        total_width = board_width + 6 * self.margin
+        total_height = board_height + 3 * self.margin + 60  # Added extra space for the button
+        
+        # Set window size and position it on the left side
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # Position window on the left side with some margin from the edge
+        x_position = 50  # 50 pixels from the left edge
+        y_position = (screen_height - total_height) // 2  # Center vertically
+        
+        self.root.geometry(f"{total_width}x{total_height}+{x_position}+{y_position}")
 
         # Canvas for board
         self.canvas = tk.Canvas(self.root, 
-                                width=total_width,
-                                height=self.board_size * self.cell_size + 2 * self.margin,
+                                width=board_width + 2 * self.margin,
+                                height=board_height + 2 * self.margin,
                                 bg=CANVAS_BG,
                                 highlightthickness=0)
-        self.canvas.pack(pady=(10, 5))
+        self.canvas.pack(pady=(30, 20))
 
         # Button under canvas
         self.restart_button = tk.Button(self.root, text="New Game", command=self.restart_game,
                                         bg=BUTTON_BG, activebackground=BUTTON_ACTIVE_BG , fg=FONTCOLOR,
                                         relief=tk.FLAT, font=FONT)
         self.restart_button.pack(pady=(0, 10))
+        
+        # Add hover effects for New Game button
+        self.restart_button.bind("<Enter>", lambda e: self.restart_button.configure(bg=BUTTON_HOVER_BG))
+        self.restart_button.bind("<Leave>", lambda e: self.restart_button.configure(bg=BUTTON_BG))
 
         # Initialize game
         self.game = GameRunner(size=self.board_size)
