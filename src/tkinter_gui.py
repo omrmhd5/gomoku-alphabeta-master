@@ -41,17 +41,40 @@ class GomokuGUI:
         self.cell_size = 30
         self.margin = 20
         
-        self.canvas = tk.Canvas(self.root, 
+        # Create main frame
+        self.main_frame = ttk.Frame(self.root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Create canvas
+        self.canvas = tk.Canvas(self.main_frame, 
                                width=self.board_size * self.cell_size + 2 * self.margin,
                                height=self.board_size * self.cell_size + 2 * self.margin,
                                bg='white')
-        self.canvas.pack()
+        self.canvas.pack(side=tk.LEFT, padx=10, pady=10)
+        
+        # Create button frame
+        self.button_frame = ttk.Frame(self.main_frame)
+        self.button_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+        
+        # Add restart button
+        self.restart_button = ttk.Button(self.button_frame, text="New Game", command=self.restart_game)
+        self.restart_button.pack(pady=10)
         
         # Initialize game with player as black (1)
         self.game = GameRunner(size=self.board_size)
         self.game.restart(player_index=1)  # 1 for black
         self.draw_board()
         self.canvas.bind('<Button-1>', self.handle_click)
+        
+    def restart_game(self):
+        self.root.destroy()
+        # Show setup window again
+        setup = SetupWindow()
+        board_size = setup.run()
+        if board_size:  # If user selected a size
+            # Start new game with selected size
+            gui = GomokuGUI(board_size)
+            gui.run()
         
     def draw_board(self):
         self.canvas.delete('all')
