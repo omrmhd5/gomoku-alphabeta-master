@@ -11,6 +11,9 @@ BLACK_PIECE = "#333333"
 WHITE_PIECE = "#ffffff"
 BUTTON_BG = "#2E3D49"
 BUTTON_ACTIVE_BG = "#547792"
+SPINBOX_BG = "#2E3D49"
+SPINBOX_FG = "white"
+SPINBOX_BORDER = "#a0a0a0"
 FONT = ("Times New Roman", 12)
 FONTCOLOR = "white"
 
@@ -26,7 +29,23 @@ class SetupWindow:
         self.label.pack(pady=(30, 10))
 
         self.size_var = tk.IntVar(value=15)
-        self.spinbox = ttk.Spinbox(self.root, from_=9, to=19, textvariable=self.size_var, width=5, font=FONT, justify='center')
+        self.spinbox = tk.Spinbox(self.root, 
+                                 from_=9, 
+                                 to=19, 
+                                 textvariable=self.size_var, 
+                                 width=10, 
+                                 font=FONT,
+                                 justify='center',
+                                 bg=SPINBOX_BG,
+                                 fg=SPINBOX_FG,
+                                 relief=tk.FLAT,
+                                 bd=6,
+                                 highlightthickness=1,
+                                 highlightbackground=SPINBOX_BORDER,
+                                 highlightcolor=SPINBOX_BORDER,
+                                 buttonbackground='gray',
+                                 buttonuprelief=tk.FLAT,
+                                 buttondownrelief=tk.FLAT)
         self.spinbox.pack(pady=10)
 
         self.start_button = tk.Button(self.root, text="Start Game", command=self.start_game,
