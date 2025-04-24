@@ -2,24 +2,36 @@ import piece
 import numpy as np
 from eval_fn import evaluation_state
 
-
 def get_best_move(state, depth, is_max_state, difficulty="Medium"):
     values = state.values
     best_value = is_max_state and -9999 or 9999
     best_move = (-1, -1)
-    pieces = len(values[values != piece.EMPTY])
+    pieces = np.count_nonzero(values != piece.EMPTY)  # Fixed: explicit count
 
     if pieces == 0:
         return first_move(state)
     if pieces == 1:
         return second_move(state)
 
-    # Completely disable AI thinking for Easy difficulty
+    # Easy difficulty: make random moves with occasional blunders
     if difficulty == "Easy":
-        # Randomly pick any available legal move (no evaluation, no minimax)
         legal_moves = state.legal_moves()
-        best_move = legal_moves[np.random.choice(len(legal_moves))]  # Randomly pick a legal move
-        return best_move, best_value
+        if len(legal_moves) > 0:  # Fixed: explicit length check
+            # 70% chance to make a completely random move
+            if np.random.random() < 0.7:
+                best_move = legal_moves[np.random.choice(len(legal_moves))]
+                return best_move, 0
+            
+            # 30% chance to try to make a reasonable move, but with minimal evaluation
+            top_moves = get_top_moves(state, 3, is_max_state, difficulty)
+            if len(top_moves) > 0:  # Fixed: explicit length check
+                # Pick a random move from the top moves but prefer worse ones
+                if len(top_moves) > 1:
+                    # Avoid the best move
+                    move_index = np.random.randint(1, len(top_moves))
+                    return top_moves[move_index], 0
+                return top_moves[0], 0
+            return legal_moves[np.random.choice(len(legal_moves))], 0
 
     top_moves = get_top_moves(state, 10, is_max_state, difficulty)
 
@@ -41,7 +53,6 @@ def get_best_move(state, depth, is_max_state, difficulty="Medium"):
         return top_moves[0]
 
     return best_move, best_value
-
 def get_top_moves(state, n, is_max_state, difficulty="Medium"):
     color = state.color
     top_moves = []
