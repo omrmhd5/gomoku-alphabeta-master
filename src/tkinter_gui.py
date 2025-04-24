@@ -1,12 +1,43 @@
 import tkinter as tk
+from tkinter import ttk
 from game import GameRunner
 
-class GomokuGUI:
+class SetupWindow:
     def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Gomoku Setup")
+        self.root.geometry("300x150")
+        
+        # Center the window
+        self.root.eval('tk::PlaceWindow . center')
+        
+        # Create and pack widgets
+        self.label = ttk.Label(self.root, text="Select Board Size (9-19):", font=('Arial', 12))
+        self.label.pack(pady=20)
+        
+        self.size_var = tk.IntVar(value=15)  # Default value
+        self.spinbox = ttk.Spinbox(self.root, from_=9, to=19, textvariable=self.size_var, width=5, font=('Arial', 12))
+        self.spinbox.pack(pady=10)
+        
+        self.start_button = ttk.Button(self.root, text="Start Game", command=self.start_game)
+        self.start_button.pack(pady=10)
+        
+        self.selected_size = None
+        
+    def start_game(self):
+        self.selected_size = self.size_var.get()
+        self.root.destroy()
+        
+    def run(self):
+        self.root.mainloop()
+        return self.selected_size
+
+class GomokuGUI:
+    def __init__(self, board_size):
         self.root = tk.Tk()
         self.root.title("Gomoku")
         
-        self.board_size = 19
+        self.board_size = board_size
         self.cell_size = 30
         self.margin = 20
         
@@ -77,5 +108,11 @@ class GomokuGUI:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    gui = GomokuGUI()
-    gui.run() 
+    # Show setup window first
+    setup = SetupWindow()
+    board_size = setup.run()
+    
+    if board_size:  # If user selected a size
+        # Start main game with selected size
+        gui = GomokuGUI(board_size)
+        gui.run() 
