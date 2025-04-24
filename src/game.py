@@ -41,33 +41,40 @@ class GameRunner:
         if self.state.color == self.ai_color:
             return False, (0, 0)
         
-        # For Easy difficulty, occasionally make a suboptimal move
-        if self.difficulty == "Easy" and np.random.random() < 0.15:
-            # Find a suboptimal move by avoiding center and nearby opponent pieces
-            legal_moves = self.state.legal_moves()
-            if len(legal_moves) > 0:  # Fixed: explicit length check
-                # Try to play in corners or edges rather than center
-                edge_moves = []
-                for move in legal_moves:
-                    i, j = move
-                    if i == 0 or i == self.size-1 or j == 0 or j == self.size-1:
-                        edge_moves.append(move)
-                
-                if len(edge_moves) > 0 and np.random.random() < 0.6:  # Fixed: explicit length check
-                    move = edge_moves[np.random.choice(len(edge_moves))]
-                else:
+        # Get AI's move
+        try:
+            move, value = get_best_move(self.state, self.depth, self.is_max_state, self.difficulty)
+            
+            # Convert move to a proper tuple if it's not already
+            # This handles cases where move might be a numpy array
+            if not isinstance(move, tuple):
+                move = tuple(map(int, move))
+            
+            # Ensure move is valid before applying it
+            if not isinstance(move, tuple) or len(move) != 2 or not self.state.is_valid_position(move):
+                # If invalid, pick a random valid move as fallback
+                legal_moves = self.state.legal_moves()
+                if len(legal_moves) > 0:
                     move = legal_moves[np.random.choice(len(legal_moves))]
-                
+                else:
+                    # No valid moves available
+                    return False, (0, 0)
+            
+            # Apply the move
+            self.state = self.state.next(move)
+            self.finished = self.state.is_terminal()
+            return True, move
+        except Exception as e:
+            # Fallback in case of any error
+            print(f"Error in AI move: {e}")
+            legal_moves = self.state.legal_moves()
+            if len(legal_moves) > 0:
+                move = legal_moves[np.random.choice(len(legal_moves))]
                 self.state = self.state.next(move)
                 self.finished = self.state.is_terminal()
                 return True, move
-        
-        # Regular AI play
-        move, value = get_best_move(self.state, self.depth, self.is_max_state, self.difficulty)
-        self.state = self.state.next(move)
-        self.finished = self.state.is_terminal()
-        return True, move
-
+            return False, (0, 0)
+    
     def get_status(self):
         board = self.state.values
         return {

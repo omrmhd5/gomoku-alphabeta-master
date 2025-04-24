@@ -5,13 +5,13 @@ import piece
 def evaluation_state(state, current_color, difficulty="Medium"):
     # For Easy difficulty, severely weaken evaluation
     if difficulty == "Easy":
-        # Return a weak evaluation that only considers immediate threats
-        # This will make the AI blind to many winning opportunities
-        basic_eval = evaluate_color(state, piece.BLACK, current_color) * 0.3 + \
-                    evaluate_color(state, piece.WHITE, current_color) * 0.3
+        # Return a very weak evaluation with lots of randomness
+        # This will make the AI miss most strategic opportunities
+        basic_eval = evaluate_color(state, piece.BLACK, current_color) * 0.2 + \
+                    evaluate_color(state, piece.WHITE, current_color) * 0.2
         
-        # Add randomness to make evaluations inconsistent
-        random_factor = np.random.random() * 50 - 25  # Random value between -25 and 25
+        # Add significant randomness to make evaluations inconsistent
+        random_factor = np.random.random() * 100 - 50  # Random value between -50 and 50
         return basic_eval + random_factor
     
     # For Medium and Hard difficulties, use the normal evaluation
@@ -21,6 +21,7 @@ def evaluation_state(state, current_color, difficulty="Medium"):
     else:  # Hard
         return (evaluate_color(state, piece.BLACK, current_color) + \
                 evaluate_color(state, piece.WHITE, current_color)) * 1.3
+    
 def evaluate_color(state, color, current_color):
     values = state.values
     size = state.size
