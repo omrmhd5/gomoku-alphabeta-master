@@ -39,11 +39,11 @@ class GameRunner:
     
     def aiplay(self):
         if self.state.color == self.ai_color:
-            return False, (0, 0)
+            return 0.0
         
         # Get AI's move
         try:
-            move, value = get_best_move(self.state, self.depth, self.is_max_state, self.difficulty)
+            move, value, move_time = get_best_move(self.state, self.depth, self.is_max_state, self.difficulty)
             
             # Convert move to a proper tuple if it's not already
             # This handles cases where move might be a numpy array
@@ -58,12 +58,12 @@ class GameRunner:
                     move = legal_moves[np.random.choice(len(legal_moves))]
                 else:
                     # No valid moves available
-                    return False, (0, 0)
+                    return 0.0
             
             # Apply the move
             self.state = self.state.next(move)
             self.finished = self.state.is_terminal()
-            return True, move
+            return move_time
         except Exception as e:
             # Fallback in case of any error
             print(f"Error in AI move: {e}")
@@ -72,8 +72,8 @@ class GameRunner:
                 move = legal_moves[np.random.choice(len(legal_moves))]
                 self.state = self.state.next(move)
                 self.finished = self.state.is_terminal()
-                return True, move
-            return False, (0, 0)
+                return 0.0
+            return 0.0
     
     def get_status(self):
         board = self.state.values

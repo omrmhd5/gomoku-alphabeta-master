@@ -94,7 +94,7 @@ class GomokuGUI:
         self.board_size = board_size
         self.difficulty = difficulty
         self.cell_size = 35
-        self.margin = 40
+        self.margin = 60
 
         # Calculate window dimensions
         board_width = self.board_size  * self.cell_size
@@ -118,6 +118,14 @@ class GomokuGUI:
                                 bg=CANVAS_BG,
                                 highlightthickness=0)
         self.canvas.pack(pady=(30, 20))
+
+        # Time display label
+        self.time_label = tk.Label(self.root, 
+                                  text="AI Move Time: 0.000s", 
+                                  bg=BACKGROUND_COLOR, 
+                                  font=FONT, 
+                                  fg=FONTCOLOR)
+        self.time_label.pack(pady=(0, 10))
 
         # Button under canvas
         self.restart_button = tk.Button(self.root, text="New Game", command=self.restart_game,
@@ -170,8 +178,6 @@ class GomokuGUI:
 
     def handle_click(self, event):
         if self.game.finished:
-            self.game.restart(player_index=1)
-            self.draw_board()
             return
 
         board_x = round((event.x - self.margin) / self.cell_size)
@@ -182,7 +188,8 @@ class GomokuGUI:
                 self.draw_board()
                 self.root.update()
                 time.sleep(0.5)
-                self.game.aiplay()
+                move_time = self.game.aiplay()
+                self.time_label.config(text=f"AI Move Time: {move_time:.3f}s")
                 self.draw_board()
 
                 if self.game.finished:
@@ -190,7 +197,7 @@ class GomokuGUI:
                     self.canvas.create_text(
                         self.board_size * self.cell_size // 2 + self.margin,
                         self.board_size * self.cell_size // 2 + self.margin,
-                        text=f"{winner} wins! Click to restart",
+                        text=f"{winner} wins!",
                         fill="red",
                         font=("Helvetica", 16, "bold"))
 

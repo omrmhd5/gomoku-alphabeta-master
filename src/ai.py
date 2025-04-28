@@ -1,22 +1,26 @@
 import piece
 import numpy as np
 from eval_fn import evaluation_state
+import time
 
 def get_best_move(state, depth, is_max_state, difficulty="Medium"):
+    start_time = time.time()
     values = state.values
     best_value = is_max_state and -9999 or 9999
     best_move = (-1, -1)
     pieces = np.count_nonzero(values != piece.EMPTY)
 
     if pieces == 0:
-        return first_move(state)
+        move, value, _ = first_move(state)
+        return move, value, time.time() - start_time
     if pieces == 1:
-        return second_move(state)
+        move, value, _ = second_move(state)
+        return move, value, time.time() - start_time
 
     # Get legal moves first to ensure we always have valid moves
     legal_moves = state.legal_moves()
     if len(legal_moves) == 0:
-        return (-1, -1), 0  # No legal moves available
+        return (-1, -1), 0, 0  # No legal moves available
         
     # Easy difficulty: make random moves with occasional blunders
     if difficulty == "Easy":
@@ -26,7 +30,7 @@ def get_best_move(state, depth, is_max_state, difficulty="Medium"):
         # Ensure move is a tuple, not an array
         if not isinstance(selected_move, tuple):
             selected_move = tuple(map(int, selected_move))
-        return selected_move, 0
+        return selected_move, 0, time.time() - start_time
 
     # Medium and Hard difficulties - use normal logic
     top_moves = get_top_moves(state, min(10, len(legal_moves)), is_max_state, difficulty)
@@ -52,7 +56,7 @@ def get_best_move(state, depth, is_max_state, difficulty="Medium"):
     if not isinstance(best_move, tuple):
         best_move = tuple(map(int, best_move))
     
-    return best_move, best_value
+    return best_move, best_value, time.time() - start_time
 
 def get_top_moves(state, n, is_max_state, difficulty="Medium"):
     color = state.color
@@ -95,7 +99,8 @@ def minimax(state, alpha, beta, depth, is_max_state, difficulty="Medium"):
 def first_move(state):
     x = state.size // 2
     # Return a proper tuple instead of array
-    return (np.random.choice((x - 1, x, x + 1)), np.random.choice((x - 1, x, x + 1))), 1
+    move = (np.random.choice((x - 1, x, x + 1)), np.random.choice((x - 1, x, x + 1)))
+    return move, 1, 0
 
 def second_move(state):
     i, j = state.last_move
@@ -103,4 +108,5 @@ def second_move(state):
     i2 = i <= size // 2 and 1 or -1
     j2 = j <= size // 2 and 1 or -1
     # Return a proper tuple
-    return (int(i + i2), int(j + j2)), 2
+    move = (int(i + i2), int(j + j2))
+    return move, 2, 0

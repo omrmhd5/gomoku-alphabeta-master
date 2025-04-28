@@ -142,5 +142,7 @@ def expand_area(size, idxs):
 
 
 def is_valid_position(board_size, position):
+    if not isinstance(position, tuple) or len(position) != 2:
+        return False
     i, j = position
     return i >= 0 and i < board_size and j >= 0 and j < board_size
