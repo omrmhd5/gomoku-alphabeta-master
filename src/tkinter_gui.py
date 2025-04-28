@@ -3,7 +3,7 @@ from tkinter import ttk
 from game import GameRunner
 import time
 
-# Styling configuration for a modern, neutral palette
+# Styling colors
 BACKGROUND_COLOR = "#547792"
 CANVAS_BG = "#e8e8e8"
 GRID_COLOR = "#a0a0a0"
@@ -11,24 +11,27 @@ BLACK_PIECE = "#333333"
 WHITE_PIECE = "#ffffff"
 BUTTON_BG = "#2E3D49"
 BUTTON_ACTIVE_BG = "#547792"
-BUTTON_HOVER_BG = "#3c4c60"  # New hover background for button
-SPINBOX_BG = "#405466"  # Lighter shade for spinbox background
+BUTTON_HOVER_BG = "#3c4c60"
+SPINBOX_BG = "#405466"
 SPINBOX_FG = "white"
 SPINBOX_BORDER = "#a0a0a0"
 FONT = ("Times New Roman", 12)
 FONTCOLOR = "white"
 
+# The First Setup Window to choose difficulties and board sizes
 class SetupWindow:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Gomoku Setup")
-        self.root.geometry("400x300")  # Increased height for difficulty selection
+        self.root.geometry("400x300")
         self.root.configure(bg=BACKGROUND_COLOR)
         self.root.eval('tk::PlaceWindow . center')
 
+        #Board Size Label
         self.label = tk.Label(self.root, text="Select Board Size (9-19):", bg=BACKGROUND_COLOR, font=("Times New Roman", 15, "bold"), fg=FONTCOLOR)
         self.label.pack(pady=(30, 10))
 
+        # Board Size Spinbox
         self.size_var = tk.IntVar(value=15)
         self.spinbox = tk.Spinbox(self.root, 
                                  from_=9, 
@@ -49,10 +52,11 @@ class SetupWindow:
                                  buttondownrelief=tk.FLAT)
         self.spinbox.pack(pady=10)
 
-        # Add difficulty selection
+        # Difficulty Label
         self.difficulty_label = tk.Label(self.root, text="Select Difficulty Level:", bg=BACKGROUND_COLOR, font=("Times New Roman", 15, "bold"), fg=FONTCOLOR)
         self.difficulty_label.pack(pady=(20, 10))
 
+        # Difficulty Selector ComboBox
         self.difficulty_var = tk.StringVar(value="Medium")
         difficulties = ["Easy", "Medium", "Hard"]
         self.difficulty_menu = ttk.Combobox(self.root, 
@@ -63,27 +67,30 @@ class SetupWindow:
                                           width=10)
         self.difficulty_menu.pack(pady=10)
 
+        #Start Game Button
         self.start_button = tk.Button(self.root, text="Start Game", command=self.start_game,
                                       bg=BUTTON_BG, activebackground=BUTTON_HOVER_BG, fg=FONTCOLOR,
                                       relief=tk.FLAT, font=FONT)
         self.start_button.pack(pady=10)
         
-        # Add hover effects for Start Game button
+        # Hover effects for Start Game button
         self.start_button.bind("<Enter>", lambda e: self.start_button.configure(bg=BUTTON_HOVER_BG))
         self.start_button.bind("<Leave>", lambda e: self.start_button.configure(bg=BUTTON_BG))
 
         self.selected_size = None
         self.selected_difficulty = None
-
+    #Saves the selected size and difficulty when "Start Game" button is clicked and closes the setup window.
     def start_game(self):
         self.selected_size = self.size_var.get()
         self.selected_difficulty = self.difficulty_var.get()
         self.root.destroy()
 
+    #Runs the setup window's main loop and returns the selected board size and difficulty.
     def run(self):
         self.root.mainloop()
         return self.selected_size, self.selected_difficulty
 
+#Main Game window
 class GomokuGUI:
     def __init__(self, board_size, difficulty="Medium"):
         self.root = tk.Tk()
@@ -96,13 +103,13 @@ class GomokuGUI:
         self.cell_size = 35
         self.margin = 60
 
-        # Calculate window dimensions
+        # window dimensions
         board_width = self.board_size  * self.cell_size
         board_height = self.board_size * self.cell_size 
         total_width = board_width + 6 * self.margin
         total_height = board_height + 3 * self.margin + 60
         
-        # Set window size and position it on the left side
+        # window size and position it on the left side
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         
@@ -111,7 +118,7 @@ class GomokuGUI:
         
         self.root.geometry(f"{total_width}x{total_height}+{x_position}+{y_position}")
 
-        # Canvas for board
+        # Canvas for the board
         self.canvas = tk.Canvas(self.root, 
                                 width=board_width + 2 * self.margin,
                                 height=board_height + 2 * self.margin,
@@ -127,7 +134,7 @@ class GomokuGUI:
                                   fg=FONTCOLOR)
         self.time_label.pack(pady=(0, 10))
 
-        # Button under canvas
+        #New Game Button under canvas
         self.restart_button = tk.Button(self.root, text="New Game", command=self.restart_game,
                                         bg=BUTTON_BG, activebackground=BUTTON_HOVER_BG, fg=FONTCOLOR,
                                         relief=tk.FLAT, font=FONT)
@@ -137,12 +144,13 @@ class GomokuGUI:
         self.restart_button.bind("<Enter>", lambda e: self.restart_button.configure(bg=BUTTON_HOVER_BG))
         self.restart_button.bind("<Leave>", lambda e: self.restart_button.configure(bg=BUTTON_BG))
 
-        # Initialize game with difficulty
+        # Initialize game with difficulty chosen above
         self.game = GameRunner(size=self.board_size, difficulty=self.difficulty)
         self.game.restart(player_index=1)
         self.draw_board()
         self.canvas.bind('<Button-1>', self.handle_click)
-
+    
+    #Destroys the current game window and opens a new SetupWindow again
     def restart_game(self):
         self.root.destroy()
         setup = SetupWindow()
@@ -150,9 +158,12 @@ class GomokuGUI:
         if board_size:
             gui = GomokuGUI(board_size, difficulty)
             gui.run()
-
+    
+    # Clears and redraws the entire board
     def draw_board(self):
         self.canvas.delete('all')
+
+        #Draws the grid lines
         for i in range(self.board_size):
             self.canvas.create_line(
                 self.margin, self.margin + i * self.cell_size,
@@ -165,7 +176,7 @@ class GomokuGUI:
                 self.margin + i * self.cell_size,
                 self.board_size * self.cell_size + self.margin,
                 fill=GRID_COLOR)
-
+        #Draws the black/white pieces based on the game's state
         for i in range(self.board_size):
             for j in range(self.board_size):
                 piece = self.game.state.values[i, j]
